@@ -63,9 +63,6 @@ public class Main {
     }
 
     private static MonthYear getMonthYear(String[] args) throws Exception {
-        int year = 0;
-        int month = 0;
-        int firstDay = 0;
         LocalDate localDate;
         MonthYear monthYear;
 
@@ -73,20 +70,48 @@ public class Main {
             localDate = LocalDate.now();
             monthYear = new MonthYear(localDate.get(ChronoField.MONTH_OF_YEAR), localDate.get(ChronoField.YEAR), 1);
         } else if (args.length == 1) {
-            throw new Exception("Only one argument. Must be three");  
-        } else if (args.length == 2) {
-            throw new Exception("Only two argument. Must be three");  
+            throw new Exception("Only one argument. Must be two or three");  
+        } else if (args.length == 2 && checkArgs(args)) {
+            monthYear = createMonthYear(args);  
         } else if (args.length > 3) {
-            throw new Exception("More than three arguments. Must be three");
-        } else if (args[0].matches("[1-9]|[1][0-2]|[0][1-9]") && args[1].matches("[0-9]{3}[1-9]") && args[2].matches("[1-7]")) {
-            month = Integer.parseInt(args[0].trim());
-            year = Integer.parseInt(args[1].trim());
-            firstDay = Integer.parseInt(args[2].trim());
-            monthYear = new MonthYear(month, year, firstDay);
+            throw new Exception("More than three arguments. Must be two or three");
+        } else if (checkArgs(args)) {
+            monthYear = createMonthYear(args);
         } else {
-            throw new Exception("Error format date");
+            throw new Exception("Undefined error");
         }
         return monthYear;
+    }
+
+    private static boolean checkArgs(String[] args) throws Exception {
+        boolean res = true;
+        String strError = "";
+
+        if (!args[0].matches("[1-9]|[1][0-2]|[0][1-9]")) {
+            strError = "Incorrect month format. Can be used only numbers 1-12.";        
+        }
+        if (!args[1].matches("[0-9]{3}[1-9]")) {
+            strError = strError + (strError.equals("") ? "" : "\n") + "Incorrect year format. Can be used only numbers 0001-9999";        
+        }
+        if (args.length == 3 && !args[2].matches("[1-7]")) {
+            strError = strError + (strError.equals("") ? "" : "\n") + "Incorrect day of week format. Can be used only numbers 1-7";    
+        }
+
+        if (!strError.equals("")) {
+            throw new Exception(strError);    
+        }
+
+        return res;
+    }
+
+    private static MonthYear createMonthYear(String[] args) {
+        int month = Integer.parseInt(args[0].trim());
+        int year = Integer.parseInt(args[1].trim());
+        int firstDay = 1;
+        if (args.length == 3) {
+            firstDay = Integer.parseInt(args[2].trim());    
+        }
+        return new MonthYear(month, year, firstDay);
     }
 
     private int getFirstDayOfWeek(MonthYear monthYear) {
